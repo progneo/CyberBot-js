@@ -3,6 +3,10 @@ module.exports = (sequelize, DataTypes) => sequelize.define('servers', {
 		type: DataTypes.STRING,
 		primaryKey: true,
 	},
+	default_role_id: {
+		type: DataTypes.STRING,
+		allowNull: true,
+	},
 }, {
 	timestamps: false,
 });

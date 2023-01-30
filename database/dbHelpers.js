@@ -51,8 +51,21 @@ async function addServerUser(serverId, userId) {
 // Server Roles
 async function addServerRole(serverId, roleId, targetLevel) {
 	await getServer(serverId);
+	const role = await ServerRoles.findOne({
+		where: { server_id: serverId, role_id: roleId },
+	});
+	if (role) {
+		return role;
+	}
 
 	return await ServerRoles.create({ server_id: serverId, role_id: roleId, target_level: targetLevel });
+}
+async function setDefaultRole(serverId, roleId) {
+	const server = await getServer(serverId);
+	await addServerRole(serverId, roleId, 0);
+	server.default_role_id = roleId;
+
+	return server.save();
 }
 
 // Balance
@@ -101,4 +114,4 @@ async function setLevel(userId, serverId, level) {
 	return serverUser.save();
 }
 
-module.exports = { addExperience };
+module.exports = { addExperience, setDefaultRole };
