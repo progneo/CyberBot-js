@@ -1,4 +1,4 @@
-const { Users, Servers, ServerRoles, ServerUsers } = require('./dbObjects.js');
+const { Users, Servers, ServerRoles, ServerUsers, VoiceSessions } = require('./dbObjects.js');
 
 // Server
 async function getServer(id) {
@@ -68,6 +68,28 @@ async function setDefaultRole(serverId, roleId) {
 	return server.save();
 }
 
+// Voice Session
+async function createVoiceSession(serverId, userId) {
+	await getServer(serverId);
+	await getUser(userId);
+
+	return await VoiceSessions.create({
+		server_id: serverId,
+		user_id: userId,
+		date_join: Date.now(),
+	});
+}
+async function getVoiceSession(serverId, userId) {
+	return await VoiceSessions.findOne({
+		where: { server_id: serverId, user_id: userId },
+	});
+}
+async function removeVoiceSession(serverId, userId) {
+	return await VoiceSessions.destroy({
+		where: { server_id: serverId, user_id: userId },
+	});
+}
+
 // Balance
 async function addBalance(id, amount) {
 	const user = await getUser(id);
@@ -114,4 +136,12 @@ async function setLevel(userId, serverId, level) {
 	return serverUser.save();
 }
 
-module.exports = { addExperience, setDefaultRole, getServer };
+module.exports = {
+	addExperience,
+	setDefaultRole,
+	getServer,
+	getServerUser,
+	createVoiceSession,
+	removeVoiceSession,
+	getVoiceSession,
+};

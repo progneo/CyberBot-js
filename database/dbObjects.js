@@ -8,6 +8,7 @@ const Servers = require('./models/Servers.js')(sequelize, Sequelize.DataTypes);
 const ServerUsers = require('./models/ServerUsers.js')(sequelize, Sequelize.DataTypes);
 const ServerAdmins = require('./models/ServerAdmins.js')(sequelize, Sequelize.DataTypes);
 const ServerRoles = require('./models/ServerRoles.js')(sequelize, Sequelize.DataTypes);
+const VoiceSessions = require('./models/VoiceSessions.js')(sequelize, Sequelize.DataTypes);
 
 ServerAdmins.belongsTo(Servers, { foreignKey: 'server_id', as: 'server' });
 ServerAdmins.belongsTo(Users, { foreignKey: 'user_id', as: 'user' });
@@ -16,6 +17,9 @@ ServerUsers.belongsTo(Servers, { foreignKey: 'server_id', as: 'server' });
 ServerUsers.belongsTo(Users, { foreignKey: 'user_id', as: 'user' });
 
 ServerRoles.belongsTo(Servers, { foreignKey: 'server_id', as: 'server' });
+
+VoiceSessions.belongsTo(Servers, { foreignKey: 'server_id', as: 'server' });
+VoiceSessions.belongsTo(Users, { foreignKey: 'user_id', as: 'user' });
 
 Reflect.defineProperty(Servers.prototype, 'getRoles', {
 	value: () => {
@@ -45,4 +49,4 @@ Reflect.defineProperty(Servers.prototype, 'getAdmins', {
 });
 
 
-module.exports = { Users, Servers, ServerUsers, ServerRoles };
+module.exports = { Users, Servers, ServerUsers, ServerRoles, VoiceSessions };
