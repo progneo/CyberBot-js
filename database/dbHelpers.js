@@ -114,4 +114,4 @@ async function setLevel(userId, serverId, level) {
 	return serverUser.save();
 }
 
-module.exports = { addExperience, setDefaultRole };
+module.exports = { addExperience, setDefaultRole, getServer };
