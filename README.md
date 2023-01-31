@@ -8,7 +8,9 @@ Rename the file `example.config.json` located in the main folder to `config.json
 ```json
 {
     "token": "your-bot-token",
-    "database_url": "your-database-url"
+    "database_url": "your-database-url",
+    "bot_status": "online|idle|dnd|invisible",
+    "bot_activity": "any-text"
 }
 ```
 
@@ -20,8 +22,8 @@ Rename the file `example.config.json` located in the main folder to `config.json
 To launch the bot, you must have an installed [Node JS](https://nodejs.org/en/).
 
 1. First you need to install dependencies with npm (or other package manager) with `npm install`.
-2. To synchronize tables in the database, use `npm run-script init_db`.
-3. Then dependencies are set and tables are synchronized, you may start the program with `npm start`.
+2. To create tables in the database, use `npm run-script init_db`.
+3. Then dependencies are set and tables are created, you may start the program with `npm start`.
 
 Please do not revoke the license and keep credits for this project. 
 If you still want to withdraw the credits, a small donation is accepted.
