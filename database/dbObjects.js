@@ -1,7 +1,9 @@
 const Sequelize = require('sequelize');
 const { database_url } = require('../config.json');
 
-const sequelize = new Sequelize(database_url);
+const sequelize = new Sequelize(database_url, {
+	logging: false,
+});
 
 const Users = require('./models/Users.js')(sequelize, Sequelize.DataTypes);
 const Servers = require('./models/Servers.js')(sequelize, Sequelize.DataTypes);
