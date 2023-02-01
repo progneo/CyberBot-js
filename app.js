@@ -1,6 +1,5 @@
 const fs = require('node:fs');
 const path = require('node:path');
-const chalk = require('chalk');
 const { Client, GatewayIntentBits, Collection } = require('discord.js');
 const { token } = require('./config.json');
 
@@ -32,7 +31,7 @@ for (const file of commandsFiles) {
 		client.commands.set(command.data.name, command);
 	}
 	else {
-		console.log(chalk.yellowBright('[WARNING]'), `The command at ${file} is missing a required "data" or "execute" property.`);
+		console.log(`[WARNING] The command at ${file} is missing a required "data" or "execute" property.`);
 	}
 }
 
