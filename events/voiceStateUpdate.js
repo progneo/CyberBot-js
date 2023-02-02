@@ -19,10 +19,10 @@ module.exports = {
 				const minutes = Math.floor((timestampLeave - timestampJoin) / 60);
 				if (minutes > 0) {
 					await addExperience(session.user_id, session.server_id, minutes);
+					const user = await getServerUser(session.server_id, session.user_id);
+					user.voiceTime += minutes;
+					await user.save();
 				}
-				const user = await getServerUser(session.server_id, session.user_id);
-				user.voiceTime += minutes;
-				await user.save();
 				await removeVoiceSession(session.server_id, session.user_id);
 			}
 		}

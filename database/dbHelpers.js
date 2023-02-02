@@ -45,7 +45,10 @@ async function addServerUser(serverId, userId) {
 	await getServer(serverId);
 	await getUser(userId);
 
-	return await ServerUsers.create({ server_id: serverId, user_id: userId });
+	const serverUser = await ServerUsers.create({ server_id: serverId, user_id: userId });
+	serverUser.updateRoles();
+
+	return serverUser;
 }
 
 // Server Roles
@@ -60,12 +63,11 @@ async function addServerRole(serverId, roleId, targetLevel) {
 
 	return await ServerRoles.create({ server_id: serverId, role_id: roleId, target_level: targetLevel });
 }
-async function setDefaultRole(serverId, roleId) {
-	const server = await getServer(serverId);
-	await addServerRole(serverId, roleId, 0);
-	server.default_role_id = roleId;
-
-	return server.save();
+async function getServerRoles(serverId) {
+	await getServer(serverId);
+	return await ServerRoles.findAll({
+		where: { server_id: serverId },
+	});
 }
 
 // Voice Session
@@ -115,6 +117,7 @@ async function addExperience(userId, serverId, experience) {
 	while (serverUser.experience >= serverUser.level * 50 + 30) {
 		serverUser.experience -= serverUser.level * 50 + 30;
 		serverUser.level += 1;
+		serverUser.updateRoles();
 	}
 
 	return serverUser.save();
@@ -125,6 +128,7 @@ async function addLevel(userId, serverId, level) {
 	const serverUser = await getServerUser(serverId, userId);
 
 	serverUser.level += Number(level);
+	serverUser.updateRoles();
 
 	return serverUser.save();
 }
@@ -132,13 +136,15 @@ async function setLevel(userId, serverId, level) {
 	const serverUser = await getServerUser(serverId, userId);
 
 	serverUser.level = Number(level);
+	serverUser.updateRoles();
 
 	return serverUser.save();
 }
 
 module.exports = {
 	addExperience,
-	setDefaultRole,
+	getServerRoles,
+	addServerRole,
 	getServer,
 	getServerUser,
 	createVoiceSession,

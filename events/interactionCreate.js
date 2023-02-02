@@ -1,5 +1,4 @@
 const { Events } = require('discord.js');
-const chalk = require('chalk');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -9,7 +8,7 @@ module.exports = {
 		const command = interaction.client.commands.get(interaction.commandName);
 
 		if (!command) {
-			console.error(chalk.redBright('[ERROR]'), `No command matching ${interaction.commandName} was found.`);
+			console.error(`[ERROR] No command matching ${interaction.commandName} was found.`);
 			return;
 		}
 
@@ -17,7 +16,7 @@ module.exports = {
 			await command.execute(interaction);
 		}
 		catch (error) {
-			console.error(chalk.redBright('[ERROR]'), `Error executing ${interaction.commandName}`, error);
+			console.error(`[ERROR] Error executing ${interaction.commandName}`, error);
 		}
 	},
 };

@@ -1,5 +1,6 @@
 const Sequelize = require('sequelize');
 const { database_url } = require('../config.json');
+const { getServerObject } = require('../app.js');
 
 const sequelize = new Sequelize(database_url, {
 	logging: false,
@@ -17,23 +18,44 @@ ServerAdmins.belongsTo(Users, { foreignKey: 'user_id', as: 'user' });
 
 ServerUsers.belongsTo(Servers, { foreignKey: 'server_id', as: 'server' });
 ServerUsers.belongsTo(Users, { foreignKey: 'user_id', as: 'user' });
+ServerUsers.belongsTo(ServerRoles, { foreignKey: 'role_id', as: 'role' });
 
 ServerRoles.belongsTo(Servers, { foreignKey: 'server_id', as: 'server' });
 
 VoiceSessions.belongsTo(Servers, { foreignKey: 'server_id', as: 'server' });
 VoiceSessions.belongsTo(Users, { foreignKey: 'user_id', as: 'user' });
 
+Reflect.defineProperty(ServerUsers.prototype, 'updateRoles', {
+	value: async function updateRoles() {
+		const role = await ServerRoles.findOne({
+			where: { server_id: this.server_id, target_level: { [Sequelize.Op.lte]: this.level } },
+			order: [['target_level', 'DESC']],
+		});
+		if (role) {
+			if (this.role_id !== role.role_id) {
+				const server = await getServerObject(this.server_id);
+				const member = await server.members.fetch(this.user_id);
+				if (this.role_id) {
+					await member.roles.remove(this.role_id);
+				}
+				await member.roles.add(role.role_id);
+				this.role_id = role.role_id;
+			}
+			this.save();
+		}
+	},
+});
+
 Reflect.defineProperty(Servers.prototype, 'getRoles', {
-	value: () => {
+	value: function getRoles() {
 		return ServerRoles.findAll({
 			where: { server_id: this.server_id },
-			include: ['role_id'],
 		});
 	},
 });
 
 Reflect.defineProperty(Servers.prototype, 'getUsers', {
-	value: () => {
+	value: function getUsers() {
 		return ServerUsers.findAll({
 			where: { server_id: this.server_id },
 			include: ['user'],
@@ -42,7 +64,7 @@ Reflect.defineProperty(Servers.prototype, 'getUsers', {
 });
 
 Reflect.defineProperty(Servers.prototype, 'getAdmins', {
-	value: () => {
+	value: function getAdmins() {
 		return ServerAdmins.findAll({
 			where: { server_id: this.server_id },
 			include: ['user'],
