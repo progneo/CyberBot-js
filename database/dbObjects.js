@@ -50,6 +50,7 @@ Reflect.defineProperty(Servers.prototype, 'getRoles', {
 	value: function getRoles() {
 		return ServerRoles.findAll({
 			where: { server_id: this.server_id },
+			order: [['target_level', 'ASC']],
 		});
 	},
 });

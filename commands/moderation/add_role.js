@@ -14,9 +14,9 @@ module.exports = {
 
 		await addServerRole(interaction.guild.id, role.id, level);
 
-		const exampleEmbed = new EmbedBuilder()
+		const embed = new EmbedBuilder()
 			.setTitle(`The role ***${role.name}*** will be issued when the user reaches level ***${level}***.`);
 
-		return interaction.reply({ embeds: [exampleEmbed], ephemeral: true });
+		return interaction.reply({ embeds: [embed], ephemeral: true });
 	},
 };
