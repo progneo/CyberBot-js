@@ -53,21 +53,42 @@ async function addServerUser(serverId, userId) {
 
 // Server Roles
 async function addServerRole(serverId, roleId, targetLevel) {
-	await getServer(serverId);
-	const role = await ServerRoles.findOne({
+	const server = await getServer(serverId);
+	let role = await ServerRoles.findOne({
 		where: { server_id: serverId, role_id: roleId },
 	});
 	if (role) {
+		role.target_level = targetLevel;
+		role.save();
+		await updateUsersRoles(server);
+		return role;
+	}
+	role = await ServerRoles.findOne({
+		where: { server_id: serverId, targetLevel: targetLevel },
+	});
+	if (role) {
+		role.roleId = roleId;
+		role.save();
+		await updateUsersRoles(server);
 		return role;
 	}
 
-	return await ServerRoles.create({ server_id: serverId, role_id: roleId, target_level: targetLevel });
+	role = await ServerRoles.create({ server_id: serverId, role_id: roleId, target_level: targetLevel });
+	await updateUsersRoles(server);
+
+	return role;
 }
 async function getServerRoles(serverId) {
 	await getServer(serverId);
 	return await ServerRoles.findAll({
 		where: { server_id: serverId },
 	});
+}
+async function updateUsersRoles(server) {
+	const users = await server.getUsers();
+	for (const user of users) {
+		await user.updateRoles();
+	}
 }
 
 // Voice Session
