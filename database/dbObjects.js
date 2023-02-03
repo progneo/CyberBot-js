@@ -16,9 +16,9 @@ const VoiceSessions = require('./models/VoiceSessions.js')(sequelize, Sequelize.
 ServerAdmins.belongsTo(Servers, { foreignKey: 'server_id', as: 'server' });
 ServerAdmins.belongsTo(Users, { foreignKey: 'user_id', as: 'user' });
 
-ServerUsers.belongsTo(Servers, { foreignKey: 'server_id', as: 'server' });
-ServerUsers.belongsTo(Users, { foreignKey: 'user_id', as: 'user' });
-ServerUsers.belongsTo(ServerRoles, { foreignKey: 'role_id', as: 'role' });
+ServerUsers.hasOne(Servers, { foreignKey: 'server_id', as: 'server' });
+ServerUsers.hasOne(Users, { foreignKey: 'user_id', as: 'user' });
+ServerUsers.hasOne(ServerRoles, { foreignKey: 'role_id', as: 'role' });
 
 ServerRoles.belongsTo(Servers, { foreignKey: 'server_id', as: 'server' });
 

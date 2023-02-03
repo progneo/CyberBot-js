@@ -166,6 +166,7 @@ module.exports = {
 	addExperience,
 	getServerRoles,
 	addServerRole,
+	getUser,
 	getServer,
 	getServerUser,
 	createVoiceSession,
