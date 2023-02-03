@@ -3,7 +3,7 @@ const { addServerRole } = require('../../database/dbHelpers.js');
 
 module.exports = {
 	data: new SlashCommandBuilder()
-		.setName('add_role')
+		.setName('addrole')
 		.setDescription('Set the default role.')
 		.addRoleOption(option => option.setName('role').setDescription('Role').setRequired(true))
 		.addIntegerOption(level => level.setName('level').setDescription('Target level').setMinValue(0).setRequired(true))
@@ -15,6 +15,7 @@ module.exports = {
 		await addServerRole(interaction.guild.id, role.id, level);
 
 		const embed = new EmbedBuilder()
+			.setColor('#2f3136')
 			.setTitle(`The role ***${role.name}*** will be issued when the user reaches level ***${level}***.`);
 
 		return interaction.reply({ embeds: [embed], ephemeral: true });
