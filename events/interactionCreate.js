@@ -1,4 +1,5 @@
 const { Events } = require('discord.js');
+const { getServerUser } = require('../database/dbHelpers.js');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -13,6 +14,7 @@ module.exports = {
 		}
 
 		try {
+			await getServerUser(interaction.guildId, interaction.member.user.id);
 			await command.execute(interaction);
 		}
 		catch (error) {
