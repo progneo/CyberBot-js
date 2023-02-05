@@ -1,6 +1,0 @@
-{
-  "token": "your-bot-token",
-  "database_url": "your-database-url",
-  "bot_status": "online|idle|dnd|invisible",
-  "bot_activity": "any-text"
-}

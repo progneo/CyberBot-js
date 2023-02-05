@@ -3,15 +3,13 @@
 
 ### Configuration
 
-Rename the file `example.config.json` located in the main folder to `config.json`.
+Rename the file `example.env` located in the main folder to `.env`.
 
-```json
-{
-    "token": "your-bot-token",
-    "database_url": "your-database-url",
-    "bot_status": "online|idle|dnd|invisible",
-    "bot_activity": "any-text"
-}
+```javascript
+token="your-bot-token"
+database_url="your-database-url"
+bot_status="online|idle|dnd|invisible"
+bot_activity="any-text"
 ```
 
 - `token`, the token of the bot available on the [Discord Developers](https://discordapp.com/developers/applications).

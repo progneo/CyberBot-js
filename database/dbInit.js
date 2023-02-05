@@ -1,7 +1,7 @@
+require('dotenv').config();
 const Sequelize = require('sequelize');
-const { database_url } = require('../config.json');
 
-const sequelize = new Sequelize(database_url);
+const sequelize = new Sequelize(process.env.database_url);
 
 require('./models/Users.js')(sequelize, Sequelize.DataTypes);
 require('./models/Servers.js')(sequelize, Sequelize.DataTypes);
