@@ -128,6 +128,20 @@ async function setBalance(id, amount) {
 
 	return user.save();
 }
+async function transferBalance(senderId, targetId, amount) {
+	const sender = await getUser(senderId);
+	const target = await getUser(targetId);
+	if (sender.balance < amount) {
+		return false;
+	}
+	else {
+		sender.balance -= amount;
+		target.balance += amount;
+		sender.save();
+		target.save();
+		return true;
+	}
+}
 
 // Experience
 async function addExperience(userId, serverId, experience) {
@@ -172,4 +186,5 @@ module.exports = {
 	createVoiceSession,
 	removeVoiceSession,
 	getVoiceSession,
+	transferBalance
 };
