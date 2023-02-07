@@ -16,18 +16,19 @@ module.exports = {
 
 		const result = await transferBalance(sender.id, target.id, amount);
 
+		console.log(target);
 		const embed = {
 			color: 0x2f3136,
 			author: {
 				name: 'Money transfer',
-				icon_url: sender.iconURL(),
+				icon_url: sender.displayAvatarURL(),
 			},
 		};
 		if (!result) {
 			embed['description'] = 'There is not enough money in your account';
 		}
 		else {
-			embed['description'] = `**${amount}** have been transferred to **${target.displayName}**`;
+			embed['description'] = `**${amount}** have been transferred to **${target.username}**`;
 		}
 
 		return interaction.editReply({ embeds: [embed] });
