@@ -1,8 +1,6 @@
-FROM node:18.14.0
-ENV NODE_ENV=production
-RUN mkdir -p /home/node/app/node_modules && chown -R node:node /home/node/app
-WORKDIR /app
+FROM node:lts-alpine as build-stage
+WORKDIR /usr/src/app
 COPY ["package.json", "package-lock.json*", "./"]
-RUN npm install --production
+RUN npm install
 COPY . .
 CMD [ "node", "app.js" ]
