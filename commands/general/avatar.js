@@ -10,10 +10,14 @@ module.exports = {
 		if (!member) {
 			member = interaction.member;
 		}
+		let name = member.displayName;
+		if (!name) {
+			name = member.username;
+		}
 		const embed = new EmbedBuilder()
 			.setColor('#2f3136')
-			.setTitle(`Avatar of ${member.displayName}`)
-			.setImage(interaction.user.displayAvatarURL({ size: 1024, dynamic: true }));
+			.setTitle(`Avatar of ${name}`)
+			.setImage(member.displayAvatarURL({ size: 1024, dynamic: true }));
 
 		return interaction.reply({ embeds: [embed] });
 	},
