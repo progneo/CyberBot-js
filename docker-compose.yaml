@@ -1,0 +1,14 @@
+version: "1"
+services:
+  discord_bot:
+    container_name: discord
+    logging:
+      options:
+        max-size: "200M"
+        max-file: "4"
+    environment:
+      - token=your-bot-token
+      - database_url=your-database-url
+      - bot_status=online|idle|dnd|invisible
+      - bot_activity=any-text
+    restart: always
