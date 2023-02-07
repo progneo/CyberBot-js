@@ -1,6 +1,7 @@
 require('dotenv').config();
 const Sequelize = require('sequelize');
 const { getServerObject } = require('../app.js');
+const {values} = require("pg/lib/native/query");
 
 const sequelize = new Sequelize(process.env.database_url, {
 	logging: false,
@@ -73,5 +74,18 @@ Reflect.defineProperty(Servers.prototype, 'getAdmins', {
 	},
 });
 
+Reflect.defineProperty(Users.prototype, 'updateDaily', {
+	value: function updateDaily() {
+		this.last_daily = Date.now();
+		return this.save();
+	},
+});
+
+Reflect.defineProperty(Users.prototype, 'addBalance', {
+	value: function addBalance(amount) {
+		this.balance += amount;
+		return this.save();
+	},
+});
 
 module.exports = { Users, Servers, ServerUsers, ServerRoles, VoiceSessions };

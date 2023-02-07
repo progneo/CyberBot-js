@@ -8,6 +8,7 @@ module.exports = (sequelize, DataTypes) => sequelize.define('users', {
 		defaultValue: 500,
 		allowNull: false,
 	},
+	last_daily: DataTypes.DATE,
 }, {
 	timestamps: false,
 });
