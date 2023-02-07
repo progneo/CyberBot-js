@@ -186,5 +186,6 @@ module.exports = {
 	createVoiceSession,
 	removeVoiceSession,
 	getVoiceSession,
-	transferBalance
+	transferBalance,
+	setLevel,
 };
