@@ -12,8 +12,8 @@ module.exports = {
 		if (!member) {
 			member = interaction.member;
 		}
-		const user = await getUser(member.user.id);
-		const serverUser = await getServerUser(guild.id, member.user.id);
+		const user = await getUser(member.id);
+		const serverUser = await getServerUser(guild.id, member.id);
 
 		const ms = serverUser.voiceTime * 1000;
 		const hours = Math.floor(serverUser.voiceTime / 60 / 60);

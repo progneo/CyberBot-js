@@ -64,7 +64,7 @@ async function addServerRole(serverId, roleId, targetLevel) {
 		return role;
 	}
 	role = await ServerRoles.findOne({
-		where: { server_id: serverId, targe_level: targetLevel },
+		where: { server_id: serverId, target_level: targetLevel },
 	});
 	if (role) {
 		role.roleId = roleId;

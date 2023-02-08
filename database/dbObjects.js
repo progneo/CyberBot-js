@@ -59,7 +59,6 @@ Reflect.defineProperty(Servers.prototype, 'getUsers', {
 	value: function getUsers() {
 		return ServerUsers.findAll({
 			where: { server_id: this.server_id },
-			include: ['user'],
 		});
 	},
 });
