@@ -1,7 +1,6 @@
 require('dotenv').config();
 const Sequelize = require('sequelize');
 const { getServerObject } = require('../app.js');
-const {values} = require("pg/lib/native/query");
 
 const sequelize = new Sequelize(process.env.database_url, {
 	logging: false,
