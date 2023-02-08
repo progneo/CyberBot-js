@@ -36,7 +36,7 @@ async function getServerUser(serverId, userId) {
 		where: { user_id: userId, server_id: serverId },
 	});
 	if (!serverUser) {
-		serverUser = addServerUser(serverId, userId);
+		serverUser = await addServerUser(serverId, userId);
 	}
 
 	return serverUser;
@@ -46,7 +46,7 @@ async function addServerUser(serverId, userId) {
 	await getUser(userId);
 
 	const serverUser = await ServerUsers.create({ server_id: serverId, user_id: userId });
-	serverUser.updateRoles();
+	await serverUser.updateRoles();
 
 	return serverUser;
 }
@@ -171,7 +171,7 @@ async function setLevel(userId, serverId, level) {
 	const serverUser = await getServerUser(serverId, userId);
 
 	serverUser.level = Number(level);
-	serverUser.updateRoles();
+	await serverUser.updateRoles();
 
 	return serverUser.save();
 }
