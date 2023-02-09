@@ -4,6 +4,8 @@ const { createVoiceSession, removeVoiceSession } = require('../database/dbHelper
 module.exports = {
 	name: Events.VoiceStateUpdate,
 	async execute(oldState, newState) {
+		if (newState.member.bot) return;
+
 		const afkChannel = newState.guild.afkChannel;
 		const newUserChannel = newState.channel;
 		const oldUserChannel = oldState.channel;
