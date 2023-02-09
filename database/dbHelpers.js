@@ -108,9 +108,21 @@ async function getVoiceSession(serverId, userId) {
 	});
 }
 async function removeVoiceSession(serverId, userId) {
-	return await VoiceSessions.destroy({
-		where: { server_id: serverId, user_id: userId },
-	});
+	const session = await getVoiceSession(serverId, userId);
+	if (session) {
+		const timestampJoin = Math.floor(Date.parse(session.date_join) / 1000);
+		const timestampLeave = Math.floor(Date.now() / 1000);
+		const seconds = Math.floor(timestampLeave - timestampJoin);
+		if (seconds > 0) {
+			await addExperience(session.user_id, session.server_id, seconds / 60);
+			const user = await getServerUser(session.server_id, session.user_id);
+			user.voiceTime += seconds;
+			await user.save();
+		}
+		return await VoiceSessions.destroy({
+			where: { server_id: serverId, user_id: userId },
+		});
+	}
 }
 
 // Balance
