@@ -114,7 +114,7 @@ async function removeVoiceSession(serverId, userId) {
 		const timestampLeave = Math.floor(Date.now() / 1000);
 		const seconds = Math.floor(timestampLeave - timestampJoin);
 		if (seconds > 0) {
-			await addExperience(session.user_id, session.server_id, seconds / 60);
+			await addExperience(session.user_id, session.server_id, Math.floor(seconds / 60));
 			const user = await getServerUser(session.server_id, session.user_id);
 			user.voiceTime += seconds;
 			await user.save();
