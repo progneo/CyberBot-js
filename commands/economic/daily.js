@@ -16,7 +16,7 @@ module.exports = {
 			},
 		};
 
-		if (!user.last_daily || (user.last_daily + 86400000 <= Date.now())) {
+		if (!user.last_daily || (user.last_daily.getTime() + 86400000 <= Date.now())) {
 			const reward = Math.floor(Math.random() * (500 - 100) + 100);
 			embed['description'] = `Today your bonus is equal to: **${reward}**`;
 			user.addBalance(reward);
