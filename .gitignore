@@ -130,4 +130,7 @@ dist
 .pnp.*
 
 # config file
-_config.json
+config.json
+
+# ide
+.idea
