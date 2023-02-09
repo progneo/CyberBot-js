@@ -14,7 +14,7 @@ module.exports = {
 		}
 		else if (oldUserChannel !== null && newUserChannel === null) {
 			if (afkChannel === null || oldUserChannel.id !== afkChannel.id) {
-				await removeVoiceSession(oldState.guild.id, oldState.guild.id);
+				await removeVoiceSession(oldState.guild.id, oldState.member.user.id);
 			}
 		}
 		else if (oldUserChannel !== null && newUserChannel !== null) {
@@ -22,7 +22,7 @@ module.exports = {
 				await createVoiceSession(newState.guild.id, newState.member.user.id);
 			}
 			if (afkChannel === null || oldUserChannel.id !== afkChannel.id) {
-				await removeVoiceSession(oldState.guild.id, oldState.guild.id);
+				await removeVoiceSession(oldState.guild.id, oldState.member.user.id);
 			}
 		}
 	},

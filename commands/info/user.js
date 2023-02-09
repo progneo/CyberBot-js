@@ -19,9 +19,14 @@ module.exports = {
 		const hours = Math.floor(serverUser.voiceTime / 60 / 60);
 		const time = new Date(ms).toISOString().slice(14, 19);
 
+		let name = member.displayName;
+		if (name === undefined) {
+			name = member.username;
+		}
+
 		const embed = new EmbedBuilder()
 			.setColor('#2f3136')
-			.setTitle(`${member.displayName}'s info`)
+			.setTitle(name)
 			.setThumbnail(member.displayAvatarURL())
 			.setDescription(`**Level:** ${serverUser.level}\n` +
 				`**Experience:** ${serverUser.experience}\\${serverUser.level * 50 + 30}\n` +
