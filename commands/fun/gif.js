@@ -38,7 +38,7 @@ module.exports = {
 				)),
 	async execute(interaction) {
 		const category = interaction.options.getString('category');
-		const result = await axios.get(`https://api.otakugifs.xyz/gif?reaction=kiss&format=${category}`);
+		const result = await axios.get(`https://api.otakugifs.xyz/gif?reaction=${category}`);
 		await interaction.reply({ content: result.data['url'], ephemeral: false });
 	},
 };
