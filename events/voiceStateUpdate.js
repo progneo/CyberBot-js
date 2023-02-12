@@ -20,11 +20,11 @@ module.exports = {
 			}
 		}
 		else if (oldUserChannel !== null && newUserChannel !== null) {
-			if (afkChannel === null || newUserChannel.id !== afkChannel.id) {
-				await createVoiceSession(newState.guild.id, newState.member.user.id);
-			}
 			if (afkChannel === null || oldUserChannel.id !== afkChannel.id) {
 				await removeVoiceSession(oldState.guild.id, oldState.member.user.id);
+			}
+			if (afkChannel === null || newUserChannel.id !== afkChannel.id) {
+				await createVoiceSession(newState.guild.id, newState.member.user.id);
 			}
 		}
 	},
