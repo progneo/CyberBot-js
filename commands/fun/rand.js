@@ -23,6 +23,6 @@ module.exports = {
 			return interaction.reply({ embeds: [embed], ephemeral: true });
 		}
 
-		return interaction.reply(Math.floor(Math.random() * (max - min) + min).toString());
+		return interaction.reply(Math.round(Math.random() * (max - min) + min).toString());
 	},
 };
