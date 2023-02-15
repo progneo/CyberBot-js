@@ -1,6 +1,19 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const { getUser } = require('../../database/dbHelpers.js');
 
+class Player {
+	constructor() {
+		this.cards = [];
+		this.points = 0;
+		this.cardsString = '';
+	}
+	addCard(card) {
+		this.cards.push(card);
+		this.points += card['points'];
+		this.cardsString += card['card'];
+	}
+}
+
 async function blackjack(interaction) {
 	const cards = [
 		{ 'points': 2, 'card': '<:52:784047848546893845>', 'name': 'two' },
@@ -214,10 +227,8 @@ async function blackjack(interaction) {
 	];
 
 	let bet = interaction.options.getInteger('bet');
-	const playerHand = [];
-	const botHand = [];
-	const player = { 'cards': '?', 'points': 0 };
-	const bot = { 'cards': '?', 'points': 0 };
+	const player = new Player();
+	const bot = new Player();
 
 	const user = await getUser(interaction.member.id);
 
@@ -233,7 +244,7 @@ async function blackjack(interaction) {
 		return interaction.editReply({ embeds: [embed] });
 	}
 
-	embed.setDescription(`**You | ${player['points']}**\n**${player['cards']}**\n**Dealer | ${bot['points']}**\n**${bot['cards']}**\n`);
+	embed.setDescription('**You | ?**\n**?**\n**Dealer | ?**\n**?**\n');
 
 	const message = await interaction.editReply({ embeds: [embed] });
 
@@ -245,10 +256,9 @@ async function blackjack(interaction) {
 
 		collector.on('collect', async (i) => {
 			await i.update({ components: [] });
-
 			switch (i.customId) {
 			case 'take':
-				playerHand.push(await takeCard('player', false));
+				player.addCard(await takeCard('player', false));
 				await updateInfo('player', false);
 				if (player['points'] > 21) {
 					await loose();
@@ -259,7 +269,7 @@ async function blackjack(interaction) {
 				}
 				break;
 			case 'pass':
-				await collector.stop;
+				await collector.stop();
 				break;
 			case 'double_bet':
 				bet *= 2;
@@ -269,20 +279,22 @@ async function blackjack(interaction) {
 		});
 
 		collector.on('end', async () => {
-			while (bot['points'] < 17) {
-				botHand.push(await takeCard('bot', false));
+			await updateInfo('bot', true);
+			while (bot.points < 17) {
+				await new Promise(r => setTimeout(r, 500));
+				bot.addCard(await takeCard('bot', false));
 				await updateInfo('bot', true);
 			}
-			if (bot['points'] > 21) {
+			if (bot.points > 21) {
 				await win();
 			}
-			else if (bot['points'] < player['points']) {
+			else if (bot.points < player.points) {
 				await win();
 			}
-			else if (bot['points'] > player['points']) {
+			else if (bot.points > player.points) {
 				await loose();
 			}
-			else if (bot['points'] === player['points']) {
+			else if (bot.points === player.points) {
 				await tie();
 			}
 			await updateInfo('bot', true);
@@ -337,7 +349,7 @@ async function blackjack(interaction) {
 					await interaction.editReply({ embeds: [embed], components: [row] });
 					await createAceButtonsCollector(cardObject);
 				}
-				else if (player['points'] === 11) {
+				else if (player.points === 11) {
 					cardObject['points'] = 1;
 				}
 				else {
@@ -345,7 +357,7 @@ async function blackjack(interaction) {
 				}
 			}
 			else if (playerType === 'bot') {
-				if (bot['points'] + 11 > 21) {
+				if (bot.points + 11 > 21) {
 					cardObject['points'] = 1;
 				}
 				else {
@@ -358,30 +370,14 @@ async function blackjack(interaction) {
 	}
 
 	async function updateInfo(playerType, isShowBotCards) {
-		let cardsLine = '';
-		let points = 0;
-		if (playerType === 'player') {
-			for (const card of playerHand) {
-				cardsLine += card['card'];
-				points = points + card['points'];
-				player['cards'] = cardsLine;
-				player['points'] = points;
-			}
-		}
-		else {
-			for (const card of botHand) {
-				cardsLine += card['card'];
-				points = points + card['points'];
-				bot['cards'] = cardsLine;
-				bot['points'] = points;
-			}
-		}
+		let description = `**You | ${player.points}**\n**${player.cardsString}**\n`;
 		if (isShowBotCards) {
-			embed.setDescription(`**You | ${player['points']}**\n**${player['cards']}**\n**Dealer | ${bot['points']}**\n**${bot['cards']}**\n`);
+			description += `**Dealer | ${bot.points}**\n**${bot.cardsString}**\n`;
 		}
 		else {
-			embed.setDescription(`**You | ${player['points']}**\n**${player['cards']}**\n**Dealer | ${botHand[0]['points']} + ?**\n**${botHand[0]['card']} + ?**\n`);
+			description += `**Dealer | ${bot.cards[0]['points']} + ?**\n**${bot.cards[0]['card']} + ?**\n`;
 		}
+		embed.setDescription(description);
 		await interaction.editReply({ embeds: [embed] });
 	}
 
@@ -397,7 +393,7 @@ async function blackjack(interaction) {
 					.setLabel('Pass')
 					.setStyle(ButtonStyle.Danger),
 			);
-		if (player['points'] === 10 && player['points'] === 11 && user.balance >= bet * 2) {
+		if (player.points === 10 && player.points === 11 && user.balance >= bet * 2) {
 			row.addComponents(
 				new ButtonBuilder()
 					.setCustomId('double_bet')
@@ -449,9 +445,9 @@ async function blackjack(interaction) {
 	}
 
 	for (let i = 0; i < 2; i += 1) {
-		botHand.push(await takeCard('bot', true));
+		bot.addCard(await takeCard('bot', true));
 		await updateInfo('bot', false);
-		playerHand.push(await takeCard('player', true));
+		player.addCard(await takeCard('player', true));
 		await updateInfo('player', false);
 	}
 
