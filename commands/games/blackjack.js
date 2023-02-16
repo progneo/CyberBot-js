@@ -3,6 +3,8 @@
 const { SlashCommandBuilder, EmbedBuilder, ButtonBuilder, ButtonStyle, ActionRowBuilder } = require('discord.js');
 const { getUser } = require('../../database/dbHelpers.js');
 
+const GameStatuses = { LOOSE: 'loose', WIN: 'win', TIE: 'tie', PLAY: 'play' };
+
 class Session {
 	constructor() {
 		this.cards = [
@@ -217,6 +219,8 @@ class Session {
 		];
 		this.player = new Player();
 		this.bot = new Bot();
+		this.gameStatus = GameStatuses.PLAY;
+		this.isPlayerPassed = false;
 		this.nextCard = undefined;
 
 		this.takeNextCard();
@@ -234,6 +238,38 @@ class Session {
 
 		return card;
 	}
+
+	checkFirstDraw() {
+		if (this.player.points === 21 && this.bot.points !== 21) {
+			this.gameStatus = GameStatuses.WIN;
+		}
+		else if (this.player.points !== 21 && this.bot.points === 21) {
+			this.gameStatus = GameStatuses.LOOSE;
+		}
+		else if (this.player.points === 21 && this.bot.points === 21) {
+			this.gameStatus = GameStatuses.TIE;
+		}
+	}
+
+	checkDraw() {
+		if (this.player.points > 21) {
+			this.gameStatus = GameStatuses.LOOSE;
+		}
+		else if (this.bot.points > 21) {
+			this.gameStatus = GameStatuses.WIN;
+		}
+		else if (this.isPlayerPassed || this.player.points === 21) {
+			if (this.bot.points === this.player.points) {
+				this.gameStatus = GameStatuses.TIE;
+			}
+			else if (this.bot.points > this.player.points) {
+				this.gameStatus = GameStatuses.LOOSE;
+			}
+			else if (this.bot.points >= 17 && this.player.points > this.bot.points) {
+				this.gameStatus = GameStatuses.WIN;
+			}
+		}
+	}
 }
 
 class Player {
@@ -250,10 +286,11 @@ class Player {
 
 	takeCard(card) {
 		if (card['name'] === 'ace') {
-			if (this.points > 11) {
+			if (this.points >= 11) {
 				card['points'] = 1;
 			}
 			else {
+				card['points'] = 11;
 				// ask player which count of points he wants to set
 			}
 		}
@@ -278,26 +315,15 @@ class Bot extends Player {
 }
 
 async function blackjack(interaction) {
-	let bet = interaction.options.getInteger('bet');
-	const user = await getUser(interaction.member.id);
-
-	const embed = new EmbedBuilder()
-		.setColor(0x2f3136)
-		.setAuthor({
-			iconURL: interaction.member.displayAvatarURL(),
-			name: 'Blackjack',
-		});
-
-	if (user.balance < bet) {
-		embed.setDescription('Not enough money');
-		return interaction.editReply({ embeds: [embed] });
+	async function checkGameStatus() {
+		switch (session.gameStatus) {
+		case GameStatuses.PLAY:
+			await createPlayerInteraction();
+			break;
+		default:
+			break;
+		}
 	}
-
-	embed.setDescription('**You | ?**\n**?**\n**Dealer | ?**\n**?**\n');
-
-	const message = await interaction.editReply({ embeds: [embed] });
-	const session = new Session();
-
 	async function createPlayerInteraction() {
 		const row = new ActionRowBuilder().addComponents(
 			new ButtonBuilder().setCustomId('take').setLabel('Take').setStyle(ButtonStyle.Success),
@@ -311,7 +337,6 @@ async function blackjack(interaction) {
 		await interaction.editReply({ embeds: [embed], components: [row] });
 		await createPlayerButtonsCollector();
 	}
-
 	async function createPlayerButtonsCollector() {
 		const collector = message.createMessageComponentCollector({
 			filter: i => i.user.id === interaction.user.id,
@@ -320,50 +345,35 @@ async function blackjack(interaction) {
 
 		collector.on('collect', async (i) => {
 			await i.update({ components: [] });
+			await collector.stop();
 			switch (i.customId) {
 			case 'take':
-				session.player.addCard(await takeCard('player', false));
-				await updateInfo('player', false);
-				if (session.player['points'] > 21) {
-					await loose();
-					await updateInfo('bot', true);
-				}
-				else {
-					await createPlayerInteraction();
-				}
-				await collector.stop();
+				session.player.takeCard(session.nextCard);
+				session.takeNextCard();
+				await updateInfo(false);
 				break;
 			case 'pass':
-				await updateInfo('bot', true);
+				session.isPlayerPassed = true;
+				await updateInfo(true);
 				while (session.bot.points < 17) {
 					await new Promise(r => setTimeout(r, 500));
-					session.bot.addCard(await takeCard('bot', false));
-					await updateInfo('bot', true);
+					session.bot.takeCard(session.nextCard);
+					session.takeNextCard();
+					await updateInfo(true);
 				}
-				if (bot.points > 21) {
-					await win();
-				}
-				else if (bot.points < player.points) {
-					await win();
-				}
-				else if (bot.points > player.points) {
-					await loose();
-				}
-				else if (bot.points === player.points) {
-					await tie();
-				}
-				await updateInfo('bot', true);
-				await collector.stop();
 				break;
 			case 'double_bet':
 				bet *= 2;
-				await collector.stop();
-				await createPlayerInteraction();
 				break;
 			}
+			session.checkDraw();
+			await checkGameStatus();
+		});
+
+		collector.on('end', async () => {
+			await message.edit({ components: [] });
 		});
 	}
-
 	async function createAceInteraction() {
 		const row = new ActionRowBuilder().addComponents(
 			new ButtonBuilder().setCustomId('eleven').setLabel('eleven').setStyle(ButtonStyle.Primary),
@@ -372,7 +382,6 @@ async function blackjack(interaction) {
 		await interaction.editReply({ embeds: [embed], components: [row] });
 		await createAceButtonsCollector();
 	}
-
 	async function createAceButtonsCollector(card) {
 		const collector = message.createMessageComponentCollector({
 			filter: i => i.user.id === interaction.user.id,
@@ -398,8 +407,7 @@ async function blackjack(interaction) {
 			await createPlayerInteraction();
 		});
 	}
-
-	async function updateInfo(playerType, isShowBotCards) {
+	async function updateInfo(isShowBotCards) {
 		let description = `**You | ${session.player.points}**\n${session.player.cardsString}\n`;
 		if (isShowBotCards) {
 			description += `**Dealer | ${session.bot.points}**\n${session.bot.cardsString}\n`;
@@ -410,13 +418,26 @@ async function blackjack(interaction) {
 		embed.setDescription(description);
 		await interaction.editReply({ embeds: [embed] });
 	}
-
 	async function endGame() {
+		await updateInfo(true);
+		switch (session.gameStatus) {
+		case GameStatuses.WIN:
+			await user.addBalance(bet * 2);
+			break;
+		case GameStatuses.TIE:
+			await user.addBalance(bet);
+			break;
+		default:
+			break;
+		}
 		await user.addBalance(bet);
+		if (bet > 0) {
+			bet -= interaction.options.getInteger('bet');
+		}
 		embed.setFields([
 			{
 				name: 'Result',
-				value: bet.toString(),
+				value: (bet).toString(),
 				inline: true,
 			},
 			{
@@ -436,44 +457,44 @@ async function blackjack(interaction) {
 		return await interaction.editReply({ embeds: [embed], components: [row] });
 	}
 
-	async function win() {
-		await endGame();
+	let bet = interaction.options.getInteger('bet');
+	const user = await getUser(interaction.member.id);
+
+	const embed = new EmbedBuilder()
+		.setColor(0x2f3136)
+		.setAuthor({
+			iconURL: interaction.member.displayAvatarURL(),
+			name: 'Blackjack',
+		});
+
+	if (user.balance < bet) {
+		embed.setDescription('Not enough money');
+		return interaction.editReply({ embeds: [embed] });
 	}
 
-	async function loose() {
-		bet = -bet;
-		await endGame();
-	}
+	user.addBalance(-bet);
 
-	async function tie() {
-		bet = 0;
-		await endGame();
-	}
+	embed.setDescription('**You | ?**\n**?**\n**Dealer | ?**\n**?**\n');
+
+	const message = await interaction.editReply({ embeds: [embed] });
+	const session = new Session();
 
 	for (let i = 0; i < 2; i += 1) {
-		session.bot.addCard(await takeCard('bot', true));
-		await updateInfo('bot', false);
-		session.player.addCard(await takeCard('player', true));
-		await updateInfo('player', false);
+		session.bot.takeCard(session.getCard());
+		session.player.takeCard(session.getCard());
 	}
 
-	if (session.player.points === 21 && session.bot.points !== 21) {
-		bet = Math.round(bet * 1.5);
-		await win();
-		await updateInfo('bot', true);
-	}
-	else if (session.player.points !== 21 && session.bot.points === 21) {
-		await loose();
-		await updateInfo('bot', true);
-	}
-	else if (session.player.points === 21 && session.bot.points === 21) {
-		await tie();
-		await updateInfo('bot', true);
+	await updateInfo(false);
+	session.checkFirstDraw();
+	await checkGameStatus();
+
+	while (session.gameStatus === GameStatuses.PLAY) {
+		await new Promise(r => setTimeout(r, 1000));
 	}
 
-	else {
-		await createPlayerInteraction();
-	}
+	await endGame();
+
+	return message;
 }
 
 async function createRestartButtonCollector(message, interaction) {
@@ -485,11 +506,14 @@ async function createRestartButtonCollector(message, interaction) {
 	collector.on('collect', async (i) => {
 		await i.update({ components: [] });
 		await collector.stop();
-		const newMessage = await blackjack(interaction);
-		await createRestartButtonCollector(newMessage, interaction);
+
+		message = await blackjack(interaction);
+		await createRestartButtonCollector(message, interaction);
 	});
 
-	collector.on('end', async () => await message.edit({ components: [] }));
+	collector.on('end', async () => {
+		await message.edit({ components: [] });
+	});
 }
 
 module.exports = {
@@ -500,5 +524,6 @@ module.exports = {
 	async execute(interaction) {
 		await interaction.deferReply();
 		const message = await blackjack(interaction);
+		await createRestartButtonCollector(message, interaction);
 	},
 };
