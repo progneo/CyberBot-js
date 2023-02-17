@@ -329,7 +329,7 @@ async function blackjack(interaction) {
 			new ButtonBuilder().setCustomId('take').setLabel('Take').setStyle(ButtonStyle.Success),
 			new ButtonBuilder().setCustomId('pass').setLabel('Pass').setStyle(ButtonStyle.Danger),
 		);
-		if (session.player.points === 10 && session.player.points === 11 && user.balance >= bet * 2) {
+		if (session.player.points === 10 && session.player.points === 11 && user.balance >= bet) {
 			row.addComponents(
 				new ButtonBuilder().setCustomId('double_bet').setLabel('Double bet').setStyle(ButtonStyle.Primary),
 			);
@@ -363,6 +363,7 @@ async function blackjack(interaction) {
 				}
 				break;
 			case 'double_bet':
+				await user.addBalance(-bet);
 				bet *= 2;
 				break;
 			}
