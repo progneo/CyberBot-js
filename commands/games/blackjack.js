@@ -426,18 +426,18 @@ async function blackjack(interaction) {
 			break;
 		case GameStatuses.TIE:
 			await user.addBalance(bet);
+			bet = 0;
+			break;
+		case GameStatuses.LOOSE:
+			bet *= -1;
 			break;
 		default:
 			break;
 		}
-		await user.addBalance(bet);
-		if (bet > 0) {
-			bet -= interaction.options.getInteger('bet');
-		}
 		embed.setFields([
 			{
 				name: 'Result',
-				value: (bet).toString(),
+				value: bet.toString(),
 				inline: true,
 			},
 			{
@@ -472,7 +472,7 @@ async function blackjack(interaction) {
 		return interaction.editReply({ embeds: [embed] });
 	}
 
-	user.addBalance(-bet);
+	await user.addBalance(-bet);
 
 	embed.setDescription('**You | ?**\n**?**\n**Dealer | ?**\n**?**\n');
 
