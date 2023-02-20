@@ -8,7 +8,7 @@ module.exports = {
 		.setDescription('Shows information about member: level, experience, balance and voice time.'),
 	async execute(interaction) {
 		const guild = interaction.guild;
-		let member = interaction.options.getUser('member');
+		let member = interaction.options.getMember('member');
 		if (!member) {
 			member = interaction.member;
 		}
