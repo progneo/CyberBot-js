@@ -16,7 +16,7 @@ module.exports = {
 		await setLevel(member.id, interaction.guildId, level);
 
 		const embed = {
-			color: 0x2f3136,
+			color: 0x2b2d31,
 			author: {
 				name: `Now ${member.username} has level ${level}`,
 				icon_url: member.displayAvatarURL(),

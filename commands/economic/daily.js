@@ -9,7 +9,7 @@ module.exports = {
 		const user = await getUser(interaction.user.id);
 
 		const embed = {
-			color: 0x2f3136,
+			color: 0x2b2d31,
 			author: {
 				name: 'Daily bonus',
 				icon_url: interaction.member.displayAvatarURL(),

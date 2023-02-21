@@ -462,7 +462,7 @@ async function blackjack(interaction) {
 	const user = await getUser(interaction.member.id);
 
 	const embed = new EmbedBuilder()
-		.setColor(0x2f3136)
+		.setColor(0x2b2d31)
 		.setAuthor({
 			iconURL: interaction.member.displayAvatarURL(),
 			name: 'Blackjack',

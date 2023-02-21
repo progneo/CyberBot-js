@@ -17,7 +17,7 @@ module.exports = {
 		}
 		const user = await getUser(member.id);
 		const embed = {
-			color: 0x2f3136,
+			color: 0x2b2d31,
 			author: {
 				name: `Balance of ${name}: ${user.balance}`,
 				icon_url: member.displayAvatarURL(),
